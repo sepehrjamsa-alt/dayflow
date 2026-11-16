@@ -1,7 +1,7 @@
 {
-  "name": "DayFlow — برنامه‌ریز شخصی",
+  "name": "DayFlow V3 — برنامه‌ریز شخصی",
   "short_name": "DayFlow",
-  "description": "برنامه‌ریز شخصی با تقویم شمسی",
+  "description": "برنامه‌ریز شخصی با تقویم شمسی و برنامه هفتگی",
   "lang": "fa",
   "dir": "rtl",
   "start_url": "./",
