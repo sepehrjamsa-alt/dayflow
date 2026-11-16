@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14171e"><link rel="manifest" href="manifest.webmanifest">
+<title>DayFlow</title>
+<style>
+:root{--bg:#14171e;--panel:#202530;--panel2:#292f3c;--text:#f1f2f6;--muted:#a5adbd;--accent:#ad91ff;--green:#77c7a7;--orange:#f0b477;--red:#ed858b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 14px calc(82px + env(safe-area-inset-bottom));max-width:720px;margin-inline:auto}
+header{display:flex;align-items:center;justify-content:space-between;padding:18px 2px 14px}h1{font-size:25px;margin:0;letter-spacing:-.5px}.sub{font-size:12px;color:var(--muted);margin-top:3px}.pill{border:1px solid #3a4050;border-radius:30px;padding:7px 11px;color:var(--muted);font-size:12px;background:transparent}
+h2{font-size:17px;margin:20px 0 12px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card,.panel{background:var(--panel);border:1px solid #2c3240;border-radius:17px;padding:14px}.statnum{font-size:27px;font-weight:700;margin-top:4px}.muted{color:var(--muted);font-size:12px}.calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.calhead strong{font-size:16px}.arrows{display:flex;gap:8px}.arrows button{width:34px;height:34px;border-radius:11px}.week,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.week div{text-align:center;color:var(--muted);font-size:11px;padding:7px 0}.day{min-height:42px;border-radius:11px;background:#252b37;border:1px solid transparent;color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:13px}.day.dim{opacity:.35}.day.selected{background:var(--accent);color:#171320;font-weight:700}.dot{width:4px;height:4px;border-radius:50%;background:var(--green)}button{font:inherit;cursor:pointer;border:0;color:inherit;background:var(--panel2);padding:10px 13px;border-radius:12px}button.primary{background:var(--accent);color:#171320;font-weight:700}button.ghost{background:#303746}.task{display:flex;align-items:center;gap:10px;padding:12px;background:var(--panel);border:1px solid #2c3240;border-radius:13px;margin:8px 0}.task.done{opacity:.55}.task.done .taskname{text-decoration:line-through}.check{width:22px;height:22px;border:1px solid #626b7d;border-radius:7px;display:grid;place-items:center;flex:none}.check.on{background:var(--green);color:#10221a;border-color:var(--green)}.taskinfo{flex:1;min-width:0}.taskname{font-weight:600;font-size:14px}.taskmeta{font-size:11px;color:var(--muted);margin-top:3px}.tag{font-size:10px;padding:4px 7px;border-radius:7px;background:#353047;color:#cbbaff}.empty{color:var(--muted);font-size:13px;text-align:center;padding:20px 8px}.nav{position:fixed;bottom:0;left:0;right:0;background:#191e28ed;backdrop-filter:blur(12px);border-top:1px solid #303644;display:flex;justify-content:space-around;padding:9px 4px calc(9px + env(safe-area-inset-bottom));max-width:720px;margin:auto}.nav button{background:transparent;color:var(--muted);font-size:11px;padding:6px 10px}.nav button.active{color:var(--accent)}.nav span{display:block;font-size:18px;margin-bottom:2px}
+input,select{width:100%;background:#171c25;color:var(--text);border:1px solid #3a4150;border-radius:11px;padding:12px;font:inherit;margin-top:5px}label{display:block;color:var(--muted);font-size:12px;margin:12px 0}.checks{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.checks label{margin:0;background:#252b37;border:1px solid #3a4150;padding:9px 11px;border-radius:10px;color:var(--text)}.checks input{width:auto;margin:0;accent-color:var(--accent)}.formactions{display:flex;gap:8px;margin-top:16px}.formactions button{flex:1}.hidden{display:none!important}.notice{background:#29253a;border:1px solid #51466f;color:#d9ceff;padding:11px;border-radius:12px;font-size:12px;line-height:1.7}.sectionhead{display:flex;justify-content:space-between;align-items:center}.smallbtn{font-size:12px;padding:8px 10px}.settingrow{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid #303644}.settingrow:last-child{border:0}
+</style>
+</head>
+<body>
+<header><div><h1>DayFlow<span style="color:var(--accent)">.</span></h1><div class="sub" id="todayLine">برنامه‌ریز شخصی تو</div></div><button class="pill" id="langBtn">فارسی / EN</button></header>
+<main id="homeView">
+<div class="stats"><div class="card"><div class="muted" id="tasksLabel">کارهای امروز</div><div class="statnum" id="todayCount">۰</div><div class="muted" id="tasksSub">۰ انجام‌شده</div></div><div class="card"><div class="muted" id="streakLabel">استریک</div><div class="statnum">🔥 <span id="streak">۰</span></div><div class="muted" id="streakSub">روز موفق متوالی</div></div></div>
+<h2 id="calendarTitle">تقویم شمسی</h2>
+<div class="panel"><div class="calhead"><button id="prevMonth" aria-label="ماه قبل">›</button><strong id="monthTitle"></strong><button id="nextMonth" aria-label="ماه بعد">‹</button></div><div class="week" id="week"></div><div class="days" id="days"></div></div>
+<div class="sectionhead"><h2 id="dayTitle">برنامه‌های این روز</h2><button class="primary smallbtn" id="addBtn">＋ افزودن</button></div>
+<div id="taskList"></div>
+</main>
+<main id="formView" class="hidden">
+<h2 id="formTitle">افزودن برنامه</h2><div class="panel">
+<label><span id="nameLabel">عنوان</span><input id="eventName" placeholder="مثلاً کلاس ریاضی"></label>
+<label><span id="typeLabel">نوع برنامه</span><select id="eventType"><option value="class">کلاس</option><option value="exam">امتحان</option><option value="homework">تکلیف</option><option value="personal">شخصی</option></select></label>
+<label><span id="dateLabel">تاریخ شمسی (سال/ماه/روز)</span><input id="eventDate" inputmode="numeric" placeholder="۱۴۰۵/۰۹/۰۴"></label>
+<label><span id="timeLabel">ساعت (اختیاری)</span><input id="eventTime" type="time" value="16:00"></label>
+<div id="reminderArea"><div class="muted" id="remindLabel">یادآوری‌های قبل از موعد (امکان انتخاب چند گزینه)</div><div class="checks">
+<label><input type="checkbox" value="3" class="remind"> ۳ روز قبل</label><label><input type="checkbox" value="2" class="remind"> ۲ روز قبل</label><label><input type="checkbox" value="1" class="remind"> ۱ روز قبل</label><label><input type="checkbox" value="0" class="remind"> همان روز</label>
+</div></div>
+<label id="repeatLabel">تکرار اعلان تکلیف<select id="repeat"><option value="60">هر ۶۰ دقیقه تا انجام تکلیف</option><option value="30">هر ۳۰ دقیقه</option><option value="120">هر ۲ ساعت</option><option value="off">بدون تکرار</option></select></label>
+<div class="formactions"><button id="cancelBtn">انصراف</button><button class="primary" id="saveBtn">ذخیره برنامه</button></div>
+</div></main>
+<main id="settingsView" class="hidden"><h2 id="settingsTitle">تنظیمات</h2><div class="panel">
+<div class="settingrow"><span id="soundText">اعلان صوتی</span><input id="soundOn" type="checkbox" checked style="width:auto"></div>
+<div class="settingrow"><span id="quietText">ساعت سکوت</span><strong>۲۳:۰۰ تا ۰۷:۰۰</strong></div>
+<div class="settingrow"><span id="calendarText">تقویم</span><strong>شمسی</strong></div>
+<p class="notice" id="permissionNote">برای دریافت اعلان‌ها، اجازه اعلان مرورگر را فعال کن. در این نسخه آزمایشی، یادآوری‌های زمان‌بندی‌شده فقط تا وقتی صفحه باز است قابل اتکا هستند.</p>
+<button class="primary" id="permissionBtn" style="width:100%">فعال‌سازی اعلان‌ها</button>
+</div><h2 id="aboutTitle">درباره نسخه آزمایشی</h2><p class="muted">اطلاعات این نسخه روی همین مرورگر و همین دستگاه ذخیره می‌شود. قبل از پاک‌کردن داده‌های مرورگر، از اطلاعات مهمت نسخه پشتیبان بگیر.</p></main>
+<nav class="nav"><button class="active" data-view="home"><span>⌂</span><b id="navHome">خانه</b></button><button data-view="calendar"><span>▦</span><b id="navCalendar">تقویم</b></button><button data-view="add"><span>＋</span><b id="navAdd">افزودن</b></button><button data-view="settings"><span>⚙</span><b id="navSettings">تنظیمات</b></button></nav>
+<script>
+const $=id=>document.getElementById(id);
+const months=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const weekdays=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'];
+const enMonths=['Farvardin','Ordibehesht','Khordad','Tir','Mordad','Shahrivar','Mehr','Aban','Azar','Dey','Bahman','Esfand'];
+const enWeek=['Sat','Sun','Mon','Tue','Wed','Thu','Fri'];
+let lang='fa', selected=new Date(), viewYear,viewMonth, events=JSON.parse(localStorage.getItem('df-events')||'[]'), editing=null, reminderTimers=[];
+function faParts(date){let p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:'numeric',month:'numeric',day:'numeric'}).formatToParts(date);let o={};p.forEach(x=>o[x.type]=x.value);return {y:+o.year,m:+o.month,d:+o.day}}
+function fromJ(y,m,d){ // Find Gregorian date matching Jalali date using Intl calendar
+ let guess=new Date(Date.UTC(y+621,m<7?2:8,Math.min(d,28),12));
+ for(let k=-5;k<=5;k++){let q=new Date(guess);q.setUTCDate(q.getUTCDate()+k);let p=faParts(q);if(p.y===y&&p.m===m&&p.d===d)return q}
+ let q=new Date(guess);for(let i=0;i<370;i++){let p=faParts(q);if(p.y===y&&p.m===m&&p.d===d)return q;q.setUTCDate(q.getUTCDate()+1)}return guess;
+}
+function toJDate(date){let p=faParts(date);return `${p.y}/${String(p.m).padStart(2,'0')}/${String(p.d).padStart(2,'0')}`}
+function parseJ(s){let m=s.trim().replace(/[۰-۹]/g,c=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(c)).match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);if(!m)return null;let d=fromJ(+m[1],+m[2],+m[3]);let p=faParts(d);return p.y===+m[1]&&p.m===+m[2]&&p.d===+m[3]?d:null}
+function dayKey(date){return toJDate(date)}
+function localDateKey(d){return dayKey(d)}
+function fmtNum(n){return lang==='fa'?String(n).replace(/\d/g,x=>'۰۱۲۳۴۵۶۷۸۹'[+x]):String(n)}
+function displayDate(d){let p=faParts(d);return `${fmtNum(p.d)} ${lang==='fa'?months[p.m-1]:enMonths[p.m-1]} ${fmtNum(p.y)}`}
+function save(){localStorage.setItem('df-events',JSON.stringify(events))}
+function show(view){['homeView','formView','settingsView'].forEach(x=>$(x).classList.add('hidden'));$(view==='home'?'homeView':view==='settings'?'settingsView':'formView').classList.remove('hidden');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));if(view==='home')render()}
+function renderCalendar(){let p=faParts(selected);viewYear=p.y;viewMonth=p.m;let first=fromJ(viewYear,viewMonth,1);let offset=(first.getUTCDay()+1)%7; // Saturday first
+ $('monthTitle').textContent=(lang==='fa'?months[viewMonth-1]:enMonths[viewMonth-1])+' '+fmtNum(viewYear);
+ $('week').innerHTML=(lang==='fa'?weekdays:enWeek).map(x=>`<div>${x}</div>`).join('');
+ let next=fromJ(viewYear,viewMonth===12?viewYear+1:viewYear,viewMonth===12?1:viewMonth+1);let total=Math.round((next-first)/86400000);
+ let html='';for(let i=0;i<offset;i++)html+='<div></div>';
+ for(let d=1;d<=total;d++){let date=fromJ(viewYear,viewMonth,d),key=dayKey(date),has=events.some(e=>e.date===key);html+=`<button class="day ${key===dayKey(selected)?'selected':''}" data-day="${key}">${fmtNum(d)}${has?'<i class="dot"></i>':''}</button>`}
+ $('days').innerHTML=html;document.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{selected=parseJ(b.dataset.day);render()});
+}
+function render(){renderCalendar();$('todayLine').textContent=lang==='fa'?'امروز: '+displayDate(new Date()):'Today: '+displayDate(new Date());$('dayTitle').textContent=(lang==='fa'?'برنامه‌های ':'Plans for ')+displayDate(selected);let list=events.filter(e=>e.date===dayKey(selected)).sort((a,b)=>(a.time||'').localeCompare(b.time||''));$('todayCount').textContent=fmtNum(events.filter(e=>e.date===dayKey(new Date())).length);$('tasksSub').textContent=fmtNum(events.filter(e=>e.date===dayKey(new Date())&&e.done).length)+(lang==='fa'?' انجام‌شده':' completed');$('taskList').innerHTML=list.length?list.map(e=>`<div class="task ${e.done?'done':''}"><button class="check ${e.done?'on':''}" data-check="${e.id}">${e.done?'✓':''}</button><div class="taskinfo"><div class="taskname">${esc(e.name)}</div><div class="taskmeta">${esc(e.time||'—')} · ${typeName(e.type)} · ${e.date}</div></div><span class="tag">${e.type==='class'?'کلاس':e.type==='exam'?'امتحان':e.type==='homework'?'تکلیف':'شخصی'}</span><button class="smallbtn" data-edit="${e.id}">⋯</button></div>`).join(''):'<div class="empty">برای این روز هنوز برنامه‌ای ثبت نکردی.</div>';
+ document.querySelectorAll('[data-check]').forEach(b=>b.onclick=()=>toggle(b.dataset.check));document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>edit(b.dataset.edit));
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function typeName(t){return ({class:'کلاس',exam:'امتحان',homework:'تکلیف',personal:'شخصی'})[t]}
+function toggle(id){let e=events.find(x=>x.id===id);e.done=!e.done;save();render()}
+function openForm(e=null){editing=e?.id||null;$('eventName').value=e?.name||'';$('eventType').value=e?.type||'class';$('eventDate').value=e?.date||toJDate(selected);$('eventTime').value=e?.time||'16:00';$('repeat').value=e?.repeat||'60';document.querySelectorAll('.remind').forEach(c=>c.checked=(e?.reminders||[]).includes(+c.value));$('formTitle').textContent=e?'ویرایش برنامه':'افزودن برنامه';show('add')}
+function edit(id){let e=events.find(x=>x.id===id);if(confirm('این برنامه را ویرایش یا حذف می‌کنی؟\\nOK = ویرایش، Cancel = بازگشت'))openForm(e);else if(confirm('برنامه حذف شود؟')){events=events.filter(x=>x.id!==id);save();render()}}
+$('saveBtn').onclick=()=>{let name=$('eventName').value.trim(),date=parseJ($('eventDate').value);if(!name||!date){alert('عنوان و تاریخ شمسی معتبر را وارد کن.');return}let item={id:editing||String(Date.now()),name,type:$('eventType').value,date:toJDate(date),time:$('eventTime').value,reminders:[...document.querySelectorAll('.remind:checked')].map(c=>+c.value),repeat:$('repeat').value,done:false};if(editing){let old=events.find(e=>e.id===editing);item.done=old?.done||false;events=events.map(e=>e.id===editing?item:e)}else events.push(item);selected=date;save();show('home');scheduleReminders();};
+$('cancelBtn').onclick=()=>show('home');$('addBtn').onclick=()=>openForm();$('prevMonth').onclick=()=>{let p=faParts(selected);selected=fromJ(p.m===1?p.y-1:p.y,p.m===1?12:p.m-1,1);render()};$('nextMonth').onclick=()=>{let p=faParts(selected);selected=fromJ(p.m===12?p.y+1:p.y,p.m===12?1:p.m+1,1);render()};
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{if(b.dataset.view==='add')openForm();else show(b.dataset.view==='calendar'?'home':b.dataset.view)});
+$('langBtn').onclick=()=>{lang=lang==='fa'?'en':'fa';document.documentElement.dir=lang==='fa'?'rtl':'ltr';$('langBtn').textContent=lang==='fa'?'فارسی / EN':'EN / فارسی';$('tasksLabel').textContent=lang==='fa'?'کارهای امروز':"Today's tasks";$('streakLabel').textContent=lang==='fa'?'استریک':'Streak';$('calendarTitle').textContent=lang==='fa'?'تقویم شمسی':'Persian calendar';$('navHome').textContent=lang==='fa'?'خانه':'Home';$('navCalendar').textContent=lang==='fa'?'تقویم':'Calendar';$('navAdd').textContent=lang==='fa'?'افزودن':'Add';$('navSettings').textContent=lang==='fa'?'تنظیمات':'Settings';$('settingsTitle').textContent=lang==='fa'?'تنظیمات':'Settings';render()};
+$('permissionBtn').onclick=async()=>{if(!('Notification'in window)){alert('مرورگر اعلان را پشتیبانی نمی‌کند.');return}let p=await Notification.requestPermission();alert(p==='granted'?'اعلان‌ها مجاز شدند.':'اجازه اعلان داده نشد.')};
+function inQuiet(){let h=new Date().getHours();return h>=23||h<7}
+function notify(title,body){if(Notification.permission==='granted'&&!inQuiet()){let n=new Notification(title,{body,icon:'icon.svg',tag:title+body});try{new AudioContext().resume()}catch(e){} }}
+function scheduleReminders(){reminderTimers.forEach(clearTimeout);reminderTimers=[];reminderIntervals.forEach(clearInterval);reminderIntervals=[];let now=Date.now();events.filter(e=>!e.done).forEach(e=>{let d=parseJ(e.date);if(!d)return;let [hh,mm]=(e.time||'09:00').split(':').map(Number);let target=new Date(d);target.setHours(hh||9,mm||0,0,0);(e.reminders||[]).forEach(days=>{let at=target.getTime()-days*86400000;if(at>now&&at-now<2147480000)reminderTimers.push(setTimeout(()=>notify('DayFlow',`${e.name} · ${days===0?'امروز':'یادآوری '+days+' روز قبل'}`),at-now))});if(e.type==='class'){let at=target.getTime()-3600000;if(at>now&&at-now<2147480000)reminderTimers.push(setTimeout(()=>notify('DayFlow','یک ساعت دیگر کلاس '+e.name+' شروع می‌شود.'),at-now));if(target.getTime()>now&&target.getTime()-now<2147480000)reminderTimers.push(setTimeout(()=>notify('DayFlow','الان زمان کلاس '+e.name+' است.'),target.getTime()-now))}if(e.type==='homework'&&e.repeat!=='off'){let delay=Number(e.repeat)*60000;let first=Math.max(target.getTime(),now+1000);let start=()=>{let latest=events.find(x=>x.id===e.id);if(latest&&!latest.done)notify('DayFlow','تکلیف '+latest.name+' هنوز انجام نشده!')};let wait=first-now;if(wait<2147480000){reminderTimers.push(setTimeout(()=>{start();let id=setInterval(()=>{let latest=events.find(x=>x.id===e.id);if(!latest||latest.done){clearInterval(id);return}start()},delay);reminderIntervals.push(id)},wait));}}})}
+function updateStreak(){let days=[...new Set(events.map(e=>e.date))].sort();let streak=0;let d=new Date();for(let i=0;i<365;i++){let key=toJDate(d),tasks=events.filter(e=>e.date===key);if(tasks.length&&tasks.every(e=>e.done)){streak++;d.setDate(d.getDate()-1)}else if(i===0){d.setDate(d.getDate()-1)}else break} $('streak').textContent=fmtNum(streak)}
+const oldRender=render;render=function(){oldRender();updateStreak()};
+$('soundOn').onchange=e=>localStorage.setItem('df-sound',e.target.checked?'1':'0');
+if('serviceWorker'in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+render();scheduleReminders();
+</script></body></html>

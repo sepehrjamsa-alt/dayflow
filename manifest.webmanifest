@@ -1,0 +1,9 @@
+{
+  "name": "DayFlow Planner",
+  "short_name": "DayFlow",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#14171e",
+  "theme_color": "#14171e",
+  "description": "Minimalist Persian calendar and personal planner"
+}
