@@ -1,4 +1,4 @@
-const CACHE = 'dayflow-v3-cache-1';
+const CACHE = 'dayflow-v4-cache-1';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon.png', './v3.js'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting()));
