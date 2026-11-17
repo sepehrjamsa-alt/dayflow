@@ -159,4 +159,134 @@ function applyV3Language(){let en=lang==='en';let ids={v3Mode:en?(prefs.mode==='
 const priorLanguageClick=$('langBtn').onclick;$('langBtn').onclick=()=>{priorLanguageClick();renderAll();applyV3Language()};
 
 setAccent(prefs.accent||'#aa8cff');applyCategoryColors();applyDashboardOrder();updateStreak();if(prefs.mode==='time'){$('v3Mode').textContent='نمای دسته‌بندی';$('v3Categories').classList.add('v3hidden')};prefs.hidden.forEach(id=>$(id)?.classList.add('v3hidden'));if(profile)profileUI();renderAll();applyV3Language();
+
+// ================= DayFlow V5 refinements =================
+document.title='DayFlow V5';
+document.querySelector('meta[name="description"]')?.setAttribute('content','DayFlow V5 — برنامه‌ریز شخصی');
+const v5style=document.createElement('style');
+v5style.textContent=`
+#v3Greeting{order:-10;margin-top:4px!important}
+#v3DashSection h2{font-size:17px}
+#v3CategorySection{display:none!important}
+#v3WeekSection{margin-top:12px}
+.v5weekhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0}
+.v5weekhead button{background:#302c3d;border-radius:11px;padding:7px 12px}
+.v5daydetail{border:1px solid var(--line);border-radius:14px;padding:11px;margin-top:8px;background:#25222f}
+.v5chatinput{display:flex;gap:7px;margin-top:10px}.v5chatinput input{flex:1;min-width:0}
+#v3DayaSection .muted{line-height:1.7}
+.v3foot{display:block;width:100%;text-align:center;padding:22px 0 12px;margin-top:26px;border-top:1px solid var(--line)}
+`;
+document.head.appendChild(v5style);
+// Greeting first, creator credit last.
+const v5home=$('homeView'), v5greet=$('v3Greeting'), v5foot=document.querySelector('.v3foot');
+if(v5home&&v5greet){const hdr=document.querySelector('header');if(hdr)hdr.after(v5greet);else v5home.prepend(v5greet);}
+if(v5home&&v5foot)v5home.appendChild(v5foot);
+// Compact today summary; keep the useful overview cards and remove the duplicate long upcoming list.
+$('upcomingTitle')?.closest('section')?.classList.add('v5hide');
+$('upcomingList')?.classList.add('v5hide');
+document.querySelector('#homeView .sectionhead h2')?.replaceChildren(document.createTextNode('خلاصه امروز'));
+// Only tasks and personal plans can be marked complete. Classes and exams are informational.
+window.taskMarkup=function(list){
+ const rank={high:0,normal:1,low:2};
+ list.sort((a,b)=>(rank[a.priority||'normal']-rank[b.priority||'normal'])||(a.time||'').localeCompare(b.time||''));
+ return list.length?list.map(e=>{
+  const trackDone=['homework','personal'].includes(e.type);
+  return `<div class="task ${trackDone&&e.done?'done':''} v3task" style="border-inline-start-color:${e.priority==='high'?'#ef929c':e.priority==='low'?'#7dd6b0':'#aa8cff'}">
+  ${trackDone?`<button class="check ${e.done?'on':''}" data-check="${e.id}">${e.done?'✓':''}</button>`:''}
+  <div class="taskinfo"><div class="taskname">${escapeHtml(e.name)}</div><div class="taskmeta">${escapeHtml(e.time||'—')} · ${cats[e.type]?.[0]||'برنامه'} · ${e.date}</div></div>
+  <span class="tag">${e.priority==='high'?'ضروری':e.priority==='low'?'کم‌اهمیت':'معمولی'}</span><button class="smallbtn ghost" data-edit="${e.id}">ویرایش</button></div>`;
+ }).join(''):'<div class="empty">برای این روز هنوز برنامه‌ای ثبت نکردی.</div>';
+};
+// Rebind task actions after replacing markup.
+const v5oldRenderHome=renderHome;
+renderHome=function(){v5oldRenderHome();};
+function v5TypeForm(){
+ const type=$('eventType')?.value;
+ const timeLabel=$('timeLabel')?.parentElement, timeOpen=$('timeOpen')?.parentElement;
+ const isExam=type==='exam';
+ if(timeLabel)timeLabel.style.display=isExam?'none':'block';
+ if($('reminderArea'))$('reminderArea').style.display=type==='class'?'none':'block';
+ if($('repeat')?.parentElement)$('repeat').parentElement.style.display=type==='class'||type==='exam'?'none':'block';
+ const rec=$('v3Recurring')?.closest('.v3field'); if(rec)rec.style.display=type==='class'?'block':'none';
+}
+$('eventType')?.addEventListener('change',v5TypeForm);
+const v5openForm=window.openForm;
+window.openForm=function(e){v5openForm(e);v5TypeForm();};
+$('saveBtn')?.addEventListener('click',()=>{setTimeout(()=>{events.forEach(e=>{if(e.type==='class'||e.type==='exam')e.done=false; if(e.type==='exam')e.time='';});save();},0)});
+// Put save button after all fields, including additional notes.
+const v5formPanel=$('formView')?.querySelector('.panel');
+const v5actions=v5formPanel?.querySelector('.formactions');
+const v5note=$('v3Note')?.closest('.v3field');
+if(v5formPanel&&v5actions&&v5note)v5formPanel.appendChild(v5actions);
+// Weekly navigation: one week at a time, select a day for its entries.
+let v5WeekOffset=0, v5SelectedDay='';
+const v5weekHead=document.createElement('div');
+v5weekHead.className='v5weekhead';
+v5weekHead.innerHTML='<button id="v5WeekPrev" aria-label="هفته قبل">‹</button><strong id="v5WeekLabel">این هفته</strong><button id="v5WeekNext" aria-label="هفته بعد">›</button>';
+$('v3Week')?.before(v5weekHead);
+function v5RenderWeek(){
+ const base=weekStart(new Date());base.setDate(base.getDate()+v5WeekOffset*7);
+ const days=Array.from({length:7},(_,i)=>{let d=new Date(base);d.setDate(d.getDate()+i);return d});
+ const fa=days.map(d=>`${faParts(d).d}`).join('، ');
+ $('v5WeekLabel').textContent=`${faParts(days[0]).d} تا ${faParts(days[6]).d}`;
+ $('v3Week').innerHTML=days.map((d,i)=>`<button class="v3day ${dayKey(d)===(v5SelectedDay||todayKey())?'active':''}" data-v5day="${dayKey(d)}"><b>${weekNames[i]}</b><br>${faParts(d).d}${events.some(e=>e.date===dayKey(d))?' •':''}</button>`).join('');
+ $('v3Week').querySelectorAll('[data-v5day]').forEach(b=>b.onclick=()=>{
+  v5SelectedDay=b.dataset.v5day;
+  $('v3Week').querySelectorAll('[data-v5day]').forEach(x=>x.classList.toggle('active',x===b));
+  const list=events.filter(e=>e.date===v5SelectedDay).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  $('v3WeekItems').innerHTML=list.length?list.map(e=>`<div class="v5daydetail"><strong>${escapeHtml(e.name)}</strong><div class="taskmeta">${e.time||'بدون ساعت'} · ${cats[e.type]?.[0]||'برنامه'}</div><button class="secondary smallbtn" data-v5edit="${e.id}" style="margin-top:7px">جزئیات و ویرایش</button></div>`).join(''):'<div class="empty">برای این روز برنامه‌ای ثبت نشده.</div>';
+  $('v3WeekItems').querySelectorAll('[data-v5edit]').forEach(x=>x.onclick=()=>edit(x.dataset.v5edit));
+ });
+ $('v3Week').querySelector(`[data-v5day="${v5SelectedDay||todayKey()}"]`)?.click();
+}
+$('v5WeekPrev').onclick=()=>{v5WeekOffset--;v5RenderWeek()};
+$('v5WeekNext').onclick=()=>{v5WeekOffset++;v5RenderWeek()};
+renderWeek=v5RenderWeek;
+// Daya: local Persian command parser. It creates only explicit, simple entries.
+$('v3DayaOpen').onclick=()=>{
+ modal('Daya · دستیار برنامه‌ریز',`
+ <p class="v3muted">دستور فارسی بنویس؛ مثلاً «فردا ساعت ۱۶ کلاس ریاضی اضافه کن» یا «برنامه امروز رو نشون بده».</p>
+ <div class="v5chatinput"><input id="v5DayaText" placeholder="مثلاً فردا ساعت ۵ تکلیف علوم"><button class="primary" id="v5DayaSend">ارسال</button></div>
+ <div id="v5DayaChat" style="max-height:38vh;overflow:auto;margin-top:12px"></div>
+ <p class="v3muted">این دستیار آفلاین و مبتنی بر تشخیص دستورهای ساده است؛ اگر جمله مبهم باشد، از تو اطلاعات بیشتری می‌خواهد.</p>`);
+ const input=$('v5DayaText'), chat=$('v5DayaChat');
+ function say(t,who='bot'){let d=document.createElement('div');d.className='v3chat '+(who==='user'?'user':'bot');d.textContent=t;chat.appendChild(d);chat.scrollTop=chat.scrollHeight}
+ function parseCommand(raw){
+  const s=raw.replace(/[۰-۹]/g,c=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(c)).toLowerCase();
+  if(/برنامه.*(امروز|فردا|هفته)|چی.*دارم/.test(s)){
+   let offset=s.includes('فردا')?1:0, d=new Date();d.setDate(d.getDate()+offset);
+   let k=key(d), list=events.filter(e=>e.date===k).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+   say(list.length?list.map(e=>`${e.time||'—'}  ${e.name}`).join('\n'):'برای این روز برنامه‌ای ثبت نشده.');
+   return;
+  }
+  if(!/(اضافه|ثبت|برنامه|بذار|قرار)/.test(s)){say('متوجه نشدم. برای افزودن برنامه، عنوان و روز را بنویس؛ مثلاً «فردا ساعت ۱۶ کلاس ریاضی اضافه کن».');return}
+  let offset=/پس.?فردا/.test(s)?2:/فردا/.test(s)?1:0, d=new Date();d.setDate(d.getDate()+offset);
+  let timeMatch=s.match(/ساعت\s*(\d{1,2})(?:[:٫.](\d{1,2}))?/);
+  let time='';
+  if(timeMatch){let h=+timeMatch[1],m=+(timeMatch[2]||0);if(h>23||m>59){say('ساعت واردشده معتبر نیست.');return}time=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')}
+  let type=/کلاس/.test(s)?'class':/(امتحان|آزمون)/.test(s)?'exam':/(تکلیف|درس|مطالعه)/.test(s)?'homework':'personal';
+  let name=raw.replace(/(امروز|فردا|پس.?فردا|ساعت\s*[۰-۹0-9]{1,2}([:٫.][۰-۹0-9]{1,2})?)/g,'').replace(/(اضافه کن|ثبت کن|اضافه|ثبت|برنامه|بذار|قرار)/g,'').trim();
+  if(!name){say('عنوان برنامه مشخص نیست. جمله را با نام برنامه بنویس.');return}
+  if(type==='class'&&!time){say('برای کلاس ساعت را هم بنویس؛ مثلاً «فردا ساعت ۱۶ کلاس ریاضی اضافه کن».');return}
+  const item={id:'df'+Date.now()+Math.random().toString(16).slice(2,6),name,type,date:key(d),time,priority:'normal',done:false,note:'افزوده‌شده با Daya'};
+  events.push(item);save();renderAll();renderHome();say(`«${name}» برای ${offset===0?'امروز':offset===1?'فردا':'پس‌فردا'} ثبت شد${time?'، ساعت '+time:''}.`);
+ }
+ function send(){let v=input.value.trim();if(!v)return; say(v,'user');input.value='';parseCommand(v)}
+ $('v5DayaSend').onclick=send;input.onkeydown=e=>{if(e.key==='Enter')send()};
+};
+
+const v5oldDashboard=renderDashboard;
+renderDashboard=function(){
+ v5oldDashboard();
+ const overdue=events.filter(e=>['homework','personal'].includes(e.type)&&!e.done&&e.date<todayKey()).sort((a,b)=>a.date.localeCompare(b.date));
+ $('v3OverdueCount').textContent=num(overdue.length);
+ $('v3Overdue').innerHTML=overdue.length?overdue.map(e=>`<div><div class="v5row"><strong>${escapeHtml(e.name)}</strong><span class="v3badge v3danger">${num(daysBetween(jdate(e.date),new Date()))} روز تأخیر</span></div><div class="v5row" style="margin-top:7px"><button class="secondary smallbtn" data-overdone="${e.id}">انجام شد</button><button class="secondary smallbtn" data-move="${e.id}">انتقال به امروز</button></div></div>`).join(''):'<div class="empty">عالیه! کار عقب‌افتاده‌ای نداری.</div>';
+ document.querySelectorAll('[data-overdone]').forEach(b=>b.onclick=()=>{let e=events.find(x=>x.id===b.dataset.overdone);if(e)e.done=true;persist()});
+ document.querySelectorAll('[data-move]').forEach(b=>b.onclick=()=>{let e=events.find(x=>x.id===b.dataset.move);if(e)e.date=todayKey();persist()});
+};
+if($('v3Hello'))$('v3Hello').textContent=`سلام ${profile?.name||'خوش آمدید'}!`;
+
+// More reliable local persistence and versioned offline cache.
+try{localStorage.setItem('df-v5-installed','1')}catch(e){}
+
 })();

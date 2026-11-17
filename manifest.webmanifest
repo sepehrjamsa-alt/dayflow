@@ -1,7 +1,7 @@
 {
-  "name": "DayFlow V4 — برنامه‌ریز شخصی",
+  "name": "DayFlow V5 — برنامه‌ریز شخصی",
   "short_name": "DayFlow",
-  "description": "برنامه‌ریز شخصی با تقویم شمسی و برنامه هفتگی",
+  "description": "برنامه‌ریز شخصی با تقویم شمسی و دستیار داخلی",
   "lang": "fa",
   "dir": "rtl",
   "start_url": "./",
@@ -10,6 +10,11 @@
   "background_color": "#14131b",
   "theme_color": "#14131b",
   "icons": [
-    { "src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
